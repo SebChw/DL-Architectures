@@ -1,0 +1,7 @@
+Lec1
+presence
+Presentations
+Recordings
+*.pyc
+__pycache__
+.pytest_cache
