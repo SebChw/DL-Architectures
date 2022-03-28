@@ -5,3 +5,6 @@ Recordings
 *.pyc
 __pycache__
 .pytest_cache
+mnist
+dist
+Package
