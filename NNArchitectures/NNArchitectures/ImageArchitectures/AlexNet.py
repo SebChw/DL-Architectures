@@ -97,6 +97,7 @@ class LinearBlock(Block):
 
 if __name__ == '__main__':
     net = AlexNet()
+    print(net.calculate_flattened_size(64))
     print(net.flattened_size)
     x = torch.randn(1,3,227,227)
     output = net(x)
