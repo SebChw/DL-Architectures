@@ -9,3 +9,4 @@ mnist
 dist
 Package
 tiny-imagenet-200
+*.pt
