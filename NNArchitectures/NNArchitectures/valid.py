@@ -32,4 +32,4 @@ def valid(dataloader, network, loss_fn, metric="accuracy", device = "cuda", leav
 
         print(f"Validation  loss: {loss_avg}, Validation {metric}: {metric_avg}")
 
-    return metric_avg
+    return loss_avg, metric_avg

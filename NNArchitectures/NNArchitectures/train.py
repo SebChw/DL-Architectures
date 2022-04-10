@@ -4,7 +4,7 @@ import os
 import torch
 from .valid import valid
 
-def train(epochs, dataloader, network, loss_fn, optimizer, device = "cuda", valid_each_epoch = False, valid_loader=None, leave_tqdm=True, save_checkpoint = True, save_folder = "models", model_name = None):
+def train(epochs, dataloader, network, loss_fn, optimizer, device = "cuda", valid_loader=None, leave_tqdm=True, save_checkpoint = True, save_folder = "models", model_name = None):
     scaler = GradScaler()
 
     if model_name is None:
@@ -14,6 +14,8 @@ def train(epochs, dataloader, network, loss_fn, optimizer, device = "cuda", vali
         os.mkdir(save_folder)
 
     epoch_losses = []
+    valid_losses = []
+    metrics = []
     best_loss = 100000
     for epoch in range(epochs):
         network.train()
@@ -44,13 +46,18 @@ def train(epochs, dataloader, network, loss_fn, optimizer, device = "cuda", vali
         loop.set_postfix(average_loss = loss_avg)
         epoch_losses.append(loss_avg)
        
-        if valid_each_epoch and valid_loader is not None:
-            valid(valid_loader, network, loss_fn, device=device, leave_tqdm=leave_tqdm)
+        if valid_loader is not None:
+            loss_valid, metric_valid = valid(valid_loader, network, loss_fn, device=device, leave_tqdm=leave_tqdm)
+            valid_losses.append(loss_valid)
+            metrics.append(metric_valid)
 
         if save_checkpoint and epoch_losses[-1] < best_loss:
             best_loss = epoch_losses[-1]
 
             torch.save(network.state_dict(), os.path.join(save_folder, model_name))
-            
+    
+    if valid_loader is not None:
+        return epoch_losses, valid_losses, metrics
+        
     return epoch_losses
 
