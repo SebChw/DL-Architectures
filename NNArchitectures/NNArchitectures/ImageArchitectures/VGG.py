@@ -30,16 +30,19 @@ class VGGsection(nn.Module):
         return X
 
 class VGG(nn.Module):
-    def __init__(self, num_of_classes, num_of_blocks: list, input_size=224, num_of_channels=3):
+    def __init__(self, num_of_classes, num_of_blocks: list, input_size=224, num_of_channels=3, num_of_previous_filters = [3, 64, 128, 256, 512,], num_of_curr_filters = [64, 128, 256, 512, 512]):
         super(VGG, self).__init__()
         self.num_of_blocks = num_of_blocks
         self.input_size = input_size
         self.num_of_classes = num_of_classes
+        self.num_of_channels = num_of_channels
+        
 
+        self.num_of_previous_filters = num_of_previous_filters
+        self.num_of_previous_filters[0] = self.num_of_channels
+        self.num_of_curr_filters = num_of_curr_filters
         self.calculate_flattened_size(self.input_size)
 
-        self.num_of_previous_filters = [num_of_channels, 64, 128, 256, 512,]
-        self.num_of_curr_filters = [64, 128, 256, 512, 512]
         self.conv_blocks = nn.ModuleList()
 
         for i in range(len(self.num_of_blocks)):
@@ -66,15 +69,13 @@ class VGG(nn.Module):
         return X
 
     def calculate_flattened_size(self, input_size=224):
-        #In case of VGG only maxpoolings decrease spatial dimension by a factor of 2 and each VGG has 5 max pooling layers
-        self.end_num_of_channels = 64 * 2 ** (len(self.num_of_blocks) - 2)
         #print(len(self.num_of_blocks))
         for i in range(len(self.num_of_blocks)):
             kernel, stride = (2,2)
             input_size = int((input_size - kernel) / stride + 1)
             
 
-        self.flattened_size = input_size ** 2 * self.end_num_of_channels
+        self.flattened_size = input_size ** 2 * self.num_of_curr_filters[-1]
 
 def get_VGG16(num_of_classes, input_size, num_of_channels):
     return VGG(num_of_classes, [2,2,3,3,3], input_size, num_of_channels)
@@ -85,6 +86,5 @@ def get_VGG19(num_of_classes, input_size, num_of_channels):
 
 if __name__ == '__main__':
     vgg = get_VGG16(100, 224, 3)
-    print(vgg.end_num_of_channels)
     input = torch.randn(1,3,224,224)
     print(vgg(input).shape)
